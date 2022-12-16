@@ -1,1 +1,1 @@
-# docs-frontend
+# Cryptway Learning Addon
