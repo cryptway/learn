@@ -110,29 +110,69 @@
                 <!--Title-->
                 <div class="font-sans bg-white pl-5 py-5  rounded shadow-lg">
                  
-                         <h1 class="font-sans mx-5 break-normal text-gray-900 text-xl">Blockchain Basics
-
-                        </h1>
+                         <h1 class="font-sans mx-5 break-normal text-gray-900 text-xl">Node.js ! </h1>
                          
                 </div>
        <br>
 
-          
+       <div class="relative mt-6  rounded shadow-lg" style="padding-top: 56.25%">
+        <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/4Wq53LL4alQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>></iframe>
+      </div>
+      <br>
 
-               
-                <!--Post Content-->
+
                 <div class=" bg-white pl-5 pr-2 py-5  rounded shadow-lg">
-                    
+                <!--Post Content-->
                
-  </div> <br>
-               
-                 
+                
+                <p>Node.js is an open-source and cross-platform JavaScript runtime environment. It is a popular tool for almost any kind of project!</p>
+
+<p>Node.js runs the V8 JavaScript engine, the core of Google Chrome, outside of the browser. This allows Node.js to be very performant.</p>
+
+<p>A Node.js app runs in a single process, without creating a new thread for every request. Node.js provides a set of asynchronous I/O primitives in its standard library that prevent JavaScript code from blocking and generally, libraries in Node.js are written using non-blocking paradigms, making blocking behavior the exception rather than the norm.</p>
+
+<p>When Node.js performs an I/O operation, like reading from the network, accessing a database or the filesystem, instead of blocking the thread and wasting CPU cycles waiting, Node.js will resume the operations when the response comes back.</p>
+
+<p>This allows Node.js to handle thousands of concurrent connections with a single server without introducing the burden of managing thread concurrency, which could be a significant source of bugs.</p>
+
+<p>Node.js has a unique advantage because millions of frontend developers that write JavaScript for the browser are now able to write the server-side code in addition to the client-side code without the need to learn a completely different language.</p>
+
+<p>In Node.js the new ECMAScript standards can be used without problems, as you don&#39;t have to wait for all your users to update their browsers - you are in charge of deciding which ECMAScript version to use by changing the Node.js version, and you can also enable specific experimental features by running Node.js with flags.</p>
+
+<h2>How do I start with Node.js after I installed it?</h2>
+
+<p>Once we have installed Node.js, let&#39;s build our first web server. Create a file named&nbsp;<code>app.js</code>&nbsp;containing the following contents:</p>
+
+ <pre class="bg-gray-900 rounded text-white font-mono text-base p-2 md:p-4">
+                       <code class="break-words whitespace-pre-wrap">
+const http = require('http');
+const hostname = '127.0.0.1';
+const port = 3000;
+
+const server = http.createServer((req, res) => {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/plain');
+  res.end('Hello World');
+});
+
+server.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});
+ </code>
+                   </pre>
+
+<p>Now, run your web server using&nbsp;<code>node app.js</code>. Visit&nbsp;<code>http://localhost:3000</code>&nbsp;and you will see a message saying &quot;Hello World&quot;.</p>
+
+<p>Refer to the&nbsp;<a href="https://nodejs.dev/en/learn/">Introduction to Node.js</a>&nbsp;for a more comprehensive guide to getting started with Node.js.</p>
+
+
+
+
                 <!--/ Post Content-->
-                 
-<style>
-    blockquote{color:white;background: #212121;overflow: auto;}
-    p{margin-top: 5px;}
-</style>
+                
+            </div>
+
+
 
 
 
@@ -144,8 +184,8 @@
     <div class="   flex mx-auto items-center flex-wrap">
         <nav aria-label="Page navigation">
           <ul class="inline-flex">
-            <li><a href="8.html"><button class="px-4 py-2 text-purple-600 transition-colors duration-150 bg-white rounded-l-lg focus:shadow-outline hover:bg-green-100">Prev</button></a></li>
-             <li><a href="10.html"><button class="px-4 py-2 text-purple-600 transition-colors duration-150 bg-white rounded-r-lg focus:shadow-outline hover:bg-green-100">Next</button></a></li>
+            <li><a href="1.html"><button class="px-4 py-2 text-purple-600 transition-colors duration-150 bg-white rounded-l-lg focus:shadow-outline hover:bg-green-100">Prev</button></a></li>
+             <li><a href="3.html"><button class="px-4 py-2 text-purple-600 transition-colors duration-150 bg-white rounded-r-lg focus:shadow-outline hover:bg-green-100">Next</button></a></li>
           </ul>
         </nav>
       </div>

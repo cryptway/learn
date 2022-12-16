@@ -110,7 +110,7 @@
                 <!--Title-->
                 <div class="font-sans bg-white pl-5 py-5  rounded shadow-lg">
                  
-                         <h1 class="font-sans mx-5 break-normal text-gray-900 text-xl">Blockchain Basics
+                         <h1 class="font-sans mx-5 break-normal text-gray-900 text-xl">Inheritance
 
                         </h1>
                          
@@ -122,7 +122,175 @@
                
                 <!--Post Content-->
                 <div class=" bg-white pl-5 pr-2 py-5  rounded shadow-lg">
-                    
+                    <p>Solidity supports multiple inheritance including polymorphism.</p>
+
+<p>Polymorphism means that a function call (internal and external) always executes the function of the same name (and parameter types) in the most derived contract in the inheritance hierarchy. This has to be explicitly enabled on each function in the hierarchy using the&nbsp;<code>virtual</code>&nbsp;and&nbsp;<code>override</code>&nbsp;keywords. See&nbsp;<a href="https://docs.soliditylang.org/en/v0.8.17/contracts.html#function-overriding">Function Overriding</a>&nbsp;for more details.</p>
+
+<p>It is possible to call functions further up in the inheritance hierarchy internally by explicitly specifying the contract using&nbsp;<code>ContractName.functionName()</code>&nbsp;or using&nbsp;<code>super.functionName()</code>&nbsp;if you want to call the function one level higher up in the flattened inheritance hierarchy (see below).</p>
+
+<p>When a contract inherits from other contracts, only a single contract is created on the blockchain, and the code from all the base contracts is compiled into the created contract. This means that all internal calls to functions of base contracts also just use internal function calls (<code>super.f(..)</code>&nbsp;will use JUMP and not a message call).</p>
+
+<p>State variable shadowing is considered as an error. A derived contract can only declare a state variable&nbsp;<code>x</code>, if there is no visible state variable with the same name in any of its bases.</p>
+
+<p>The general inheritance system is very similar to&nbsp;<a href="https://docs.python.org/3/tutorial/classes.html#inheritance">Python&rsquo;s</a>, especially concerning multiple inheritance, but there are also some&nbsp;<a href="https://docs.soliditylang.org/en/v0.8.17/contracts.html#multi-inheritance">differences</a>.</p>
+
+<p>Details are given in the following example.</p>
+
+<p>&nbsp;</p>
+
+<pre>
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity &gt;=0.7.0 &lt;0.9.0;
+
+
+contract Owned {
+    constructor() { owner = payable(msg.sender); }
+    address payable owner;
+}
+
+
+// Use `is` to derive from another contract. Derived
+// contracts can access all non-private members including
+// internal functions and state variables. These cannot be
+// accessed externally via `this`, though.
+contract Destructible is Owned {
+    // The keyword `virtual` means that the function can change
+    // its behaviour in derived classes (&quot;overriding&quot;).
+    function destroy() virtual public {
+        if (msg.sender == owner) selfdestruct(owner);
+    }
+}
+
+
+// These abstract contracts are only provided to make the
+// interface known to the compiler. Note the function
+// without body. If a contract does not implement all
+// functions it can only be used as an interface.
+abstract contract Config {
+    function lookup(uint id) public virtual returns (address adr);
+}
+
+
+abstract contract NameReg {
+    function register(bytes32 name) public virtual;
+    function unregister() public virtual;
+}
+
+
+// Multiple inheritance is possible. Note that `Owned` is
+// also a base class of `Destructible`, yet there is only a single
+// instance of `Owned` (as for virtual inheritance in C++).
+contract Named is Owned, Destructible {
+    constructor(bytes32 name) {
+        Config config = Config(0xD5f9D8D94886E70b06E474c3fB14Fd43E2f23970);
+        NameReg(config.lookup(1)).register(name);
+    }
+
+    // Functions can be overridden by another function with the same name and
+    // the same number/types of inputs.  If the overriding function has different
+    // types of output parameters, that causes an error.
+    // Both local and message-based function calls take these overrides
+    // into account.
+    // If you want the function to override, you need to use the
+    // `override` keyword. You need to specify the `virtual` keyword again
+    // if you want this function to be overridden again.
+    function destroy() public virtual override {
+        if (msg.sender == owner) {
+            Config config = Config(0xD5f9D8D94886E70b06E474c3fB14Fd43E2f23970);
+            NameReg(config.lookup(1)).unregister();
+            // It is still possible to call a specific
+            // overridden function.
+            Destructible.destroy();
+        }
+    }
+}
+
+
+// If a constructor takes an argument, it needs to be
+// provided in the header or modifier-invocation-style at
+// the constructor of the derived contract (see below).
+contract PriceFeed is Owned, Destructible, Named(&quot;GoldFeed&quot;) {
+    function updateInfo(uint newInfo) public {
+        if (msg.sender == owner) info = newInfo;
+    }
+
+    // Here, we only specify `override` and not `virtual`.
+    // This means that contracts deriving from `PriceFeed`
+    // cannot change the behaviour of `destroy` anymore.
+    function destroy() public override(Destructible, Named) { Named.destroy(); }
+    function get() public view returns(uint r) { return info; }
+
+    uint info;
+}
+</pre>
+
+<p>Note that above, we call&nbsp;<code>Destructible.destroy()</code>&nbsp;to &ldquo;forward&rdquo; the destruction request. The way this is done is problematic, as seen in the following example:</p>
+
+<p>&nbsp;</p>
+
+<pre>
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity &gt;=0.7.0 &lt;0.9.0;
+
+contract owned {
+    constructor() { owner = payable(msg.sender); }
+    address payable owner;
+}
+
+contract Destructible is owned {
+    function destroy() public virtual {
+        if (msg.sender == owner) selfdestruct(owner);
+    }
+}
+
+contract Base1 is Destructible {
+    function destroy() public virtual override { /* do cleanup 1 */ Destructible.destroy(); }
+}
+
+contract Base2 is Destructible {
+    function destroy() public virtual override { /* do cleanup 2 */ Destructible.destroy(); }
+}
+
+contract Final is Base1, Base2 {
+    function destroy() public override(Base1, Base2) { Base2.destroy(); }
+}
+</pre>
+
+<p>A call to&nbsp;<code>Final.destroy()</code>&nbsp;will call&nbsp;<code>Base2.destroy</code>&nbsp;because we specify it explicitly in the final override, but this function will bypass&nbsp;<code>Base1.destroy</code>. The way around this is to use&nbsp;<code>super</code>:</p>
+
+<p>&nbsp;</p>
+
+<pre>
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity &gt;=0.7.0 &lt;0.9.0;
+
+contract owned {
+    constructor() { owner = payable(msg.sender); }
+    address payable owner;
+}
+
+contract Destructible is owned {
+    function destroy() virtual public {
+        if (msg.sender == owner) selfdestruct(owner);
+    }
+}
+
+contract Base1 is Destructible {
+    function destroy() public virtual override { /* do cleanup 1 */ super.destroy(); }
+}
+
+
+contract Base2 is Destructible {
+    function destroy() public virtual override { /* do cleanup 2 */ super.destroy(); }
+}
+
+contract Final is Base1, Base2 {
+    function destroy() public override(Base1, Base2) { super.destroy(); }
+}
+</pre>
+
+<p>If&nbsp;<code>Base2</code>&nbsp;calls a function of&nbsp;<code>super</code>, it does not simply call this function on one of its base contracts. Rather, it calls this function on the next base contract in the final inheritance graph, so it will call&nbsp;<code>Base1.destroy()</code>&nbsp;(note that the final inheritance sequence is &ndash; starting with the most derived contract: Final, Base2, Base1, Destructible, owned). The actual function that is called when using super is not known in the context of the class where it is used, although its type is known. This is similar for ordinary virtual method lookup.</p>
+
                
   </div> <br>
                
@@ -131,6 +299,7 @@
                  
 <style>
     blockquote{color:white;background: #212121;overflow: auto;}
+    pre,code{color:white;background: #212121;overflow: auto;}
     p{margin-top: 5px;}
 </style>
 
@@ -144,8 +313,8 @@
     <div class="   flex mx-auto items-center flex-wrap">
         <nav aria-label="Page navigation">
           <ul class="inline-flex">
-            <li><a href="8.html"><button class="px-4 py-2 text-purple-600 transition-colors duration-150 bg-white rounded-l-lg focus:shadow-outline hover:bg-green-100">Prev</button></a></li>
-             <li><a href="10.html"><button class="px-4 py-2 text-purple-600 transition-colors duration-150 bg-white rounded-r-lg focus:shadow-outline hover:bg-green-100">Next</button></a></li>
+            <li><a href="13.html"><button class="px-4 py-2 text-purple-600 transition-colors duration-150 bg-white rounded-l-lg focus:shadow-outline hover:bg-green-100">Prev</button></a></li>
+             <li><a href="15.html"><button class="px-4 py-2 text-purple-600 transition-colors duration-150 bg-white rounded-r-lg focus:shadow-outline hover:bg-green-100">Next</button></a></li>
           </ul>
         </nav>
       </div>

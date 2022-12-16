@@ -123,7 +123,27 @@
                 <!--Post Content-->
                 <div class=" bg-white pl-5 pr-2 py-5  rounded shadow-lg">
                     
-               
+<p>Blockchains as a concept are not too hard to understand for programmers. The reason is that most of the complications (mining,&nbsp;<a href="https://en.wikipedia.org/wiki/Cryptographic_hash_function">hashing</a>,&nbsp;<a href="https://en.wikipedia.org/wiki/Elliptic_curve_cryptography">elliptic-curve cryptography</a>,&nbsp;<a href="https://en.wikipedia.org/wiki/Peer-to-peer">peer-to-peer networks</a>, etc.) are just there to provide a certain set of features and promises for the platform. Once you accept these features as given, you do not have to worry about the underlying technology - or do you have to know how Amazon&rsquo;s AWS works internally in order to use it?</p>
+
+<h3>Transactions</h3>
+
+<p>A blockchain is a globally shared, transactional database. This means that everyone can read entries in the database just by participating in the network. If you want to change something in the database, you have to create a so-called transaction which has to be accepted by all others. The word transaction implies that the change you want to make (assume you want to change two values at the same time) is either not done at all or completely applied. Furthermore, while your transaction is being applied to the database, no other transaction can alter it.</p>
+
+<p>As an example, imagine a table that lists the balances of all accounts in an electronic currency. If a transfer from one account to another is requested, the transactional nature of the database ensures that if the amount is subtracted from one account, it is always added to the other account. If due to whatever reason, adding the amount to the target account is not possible, the source account is also not modified.</p>
+
+<p>Furthermore, a transaction is always cryptographically signed by the sender (creator). This makes it straightforward to guard access to specific modifications of the database. In the example of the electronic currency, a simple check ensures that only the person holding the keys to the account can transfer money from it.</p>
+
+<h3>Blocks</h3>
+
+<p>One major obstacle to overcome is what (in Bitcoin terms) is called a &ldquo;double-spend attack&rdquo;: What happens if two transactions exist in the network that both want to empty an account? Only one of the transactions can be valid, typically the one that is accepted first. The problem is that &ldquo;first&rdquo; is not an objective term in a peer-to-peer network.</p>
+
+<p>The abstract answer to this is that you do not have to care. A globally accepted order of the transactions will be selected for you, solving the conflict. The transactions will be bundled into what is called a &ldquo;block&rdquo; and then they will be executed and distributed among all participating nodes. If two transactions contradict each other, the one that ends up being second will be rejected and not become part of the block.</p>
+
+<p>These blocks form a linear sequence in time and that is where the word &ldquo;blockchain&rdquo; derives from. Blocks are added to the chain in rather regular intervals - for Ethereum this is roughly every 17 seconds.</p>
+
+<p>As part of the &ldquo;order selection mechanism&rdquo; (which is called &ldquo;mining&rdquo;) it may happen that blocks are reverted from time to time, but only at the &ldquo;tip&rdquo; of the chain. The more blocks are added on top of a particular block, the less likely this block will be reverted. So it might be that your transactions are reverted and even removed from the blockchain, but the longer you wait, the less likely it will be.</p>
+
+                    
   </div> <br>
                
                  

@@ -110,7 +110,7 @@
                 <!--Title-->
                 <div class="font-sans bg-white pl-5 py-5  rounded shadow-lg">
                  
-                         <h1 class="font-sans mx-5 break-normal text-gray-900 text-xl">Blockchain Basics
+                         <h1 class="font-sans mx-5 break-normal text-gray-900 text-xl">Creating Contracts
 
                         </h1>
                          
@@ -122,7 +122,116 @@
                
                 <!--Post Content-->
                 <div class=" bg-white pl-5 pr-2 py-5  rounded shadow-lg">
+                    <p>Contracts can be created &ldquo;from outside&rdquo; via Ethereum transactions or from within Solidity contracts.</p>
+
+                    <p>IDEs, such as&nbsp;<a href="https://remix.ethereum.org/">Remix</a>, make the creation process seamless using UI elements.</p>
                     
+                    <p>One way to create contracts programmatically on Ethereum is via the JavaScript API&nbsp;<a href="https://github.com/ethereum/web3.js">web3.js</a>. It has a function called&nbsp;<a href="https://web3js.readthedocs.io/en/1.0/web3-eth-contract.html#new-contract">web3.eth.Contract</a>&nbsp;to facilitate contract creation.</p>
+                    
+                    <p>When a contract is created, its&nbsp;<a href="https://docs.soliditylang.org/en/v0.8.17/contracts.html#constructor">constructor</a>&nbsp;(a function declared with the&nbsp;<code>constructor</code>&nbsp;keyword) is executed once.</p>
+                    
+                    <p>A constructor is optional. Only one constructor is allowed, which means overloading is not supported.</p>
+                    
+                    <p>After the constructor has executed, the final code of the contract is stored on the blockchain. This code includes all public and external functions and all functions that are reachable from there through function calls. The deployed code does not include the constructor code or internal functions only called from the constructor.</p>
+                    
+                    <p>Internally, constructor arguments are passed&nbsp;<a href="https://docs.soliditylang.org/en/v0.8.17/abi-spec.html#abi">ABI encoded</a>&nbsp;after the code of the contract itself, but you do not have to care about this if you use&nbsp;<code>web3.js</code>.</p>
+                    
+                    <p>If a contract wants to create another contract, the source code (and the binary) of the created contract has to be known to the creator. This means that cyclic creation dependencies are impossible.</p>
+                    
+                    <p>&nbsp;</p>
+                    
+                    <blockquote>
+                    <pre>
+                    // SPDX-License-Identifier: GPL-3.0
+                    pragma solidity &gt;=0.4.22 &lt;0.9.0;
+                    
+                    
+                    contract OwnedToken {
+                        // `TokenCreator` is a contract type that is defined below.
+                        // It is fine to reference it as long as it is not used
+                        // to create a new contract.
+                        TokenCreator creator;
+                        address owner;
+                        bytes32 name;
+                    
+                        // This is the constructor which registers the
+                        // creator and the assigned name.
+                        constructor(bytes32 name_) {
+                            // State variables are accessed via their name
+                            // and not via e.g. `this.owner`. Functions can
+                            // be accessed directly or through `this.f`,
+                            // but the latter provides an external view
+                            // to the function. Especially in the constructor,
+                            // you should not access functions externally,
+                            // because the function does not exist yet.
+                            // See the next section for details.
+                            owner = msg.sender;
+                    
+                            // We perform an explicit type conversion from `address`
+                            // to `TokenCreator` and assume that the type of
+                            // the calling contract is `TokenCreator`, there is
+                            // no real way to verify that.
+                            // This does not create a new contract.
+                            creator = TokenCreator(msg.sender);
+                            name = name_;
+                        }
+                    
+                        function changeName(bytes32 newName) public {
+                            // Only the creator can alter the name.
+                            // We compare the contract based on its
+                            // address which can be retrieved by
+                            // explicit conversion to address.
+                            if (msg.sender == address(creator))
+                                name = newName;
+                        }
+                    
+                        function transfer(address newOwner) public {
+                            // Only the current owner can transfer the token.
+                            if (msg.sender != owner) return;
+                    
+                            // We ask the creator contract if the transfer
+                            // should proceed by using a function of the
+                            // `TokenCreator` contract defined below. If
+                            // the call fails (e.g. due to out-of-gas),
+                            // the execution also fails here.
+                            if (creator.isTokenTransferOK(owner, newOwner))
+                                owner = newOwner;
+                        }
+                    }
+                    
+                    
+                    contract TokenCreator {
+                        function createToken(bytes32 name)
+                            public
+                            returns (OwnedToken tokenAddress)
+                        {
+                            // Create a new `Token` contract and return its address.
+                            // From the JavaScript side, the return type
+                            // of this function is `address`, as this is
+                            // the closest type available in the ABI.
+                            return new OwnedToken(name);
+                        }
+                    
+                        function changeName(OwnedToken tokenAddress, bytes32 name) public {
+                            // Again, the external type of `tokenAddress` is
+                            // simply `address`.
+                            tokenAddress.changeName(name);
+                        }
+                    
+                        // Perform checks to determine if transferring a token to the
+                        // `OwnedToken` contract should proceed
+                        function isTokenTransferOK(address currentOwner, address newOwner)
+                            public
+                            pure
+                            returns (bool ok)
+                        {
+                            // Check an arbitrary condition to see if transfer should proceed
+                            return keccak256(abi.encodePacked(currentOwner, newOwner))[0] == 0x7f;
+                        }
+                    }
+                    </pre>
+                    </blockquote>
+                       
                
   </div> <br>
                
@@ -144,8 +253,8 @@
     <div class="   flex mx-auto items-center flex-wrap">
         <nav aria-label="Page navigation">
           <ul class="inline-flex">
-            <li><a href="8.html"><button class="px-4 py-2 text-purple-600 transition-colors duration-150 bg-white rounded-l-lg focus:shadow-outline hover:bg-green-100">Prev</button></a></li>
-             <li><a href="10.html"><button class="px-4 py-2 text-purple-600 transition-colors duration-150 bg-white rounded-r-lg focus:shadow-outline hover:bg-green-100">Next</button></a></li>
+            <li><a href="11.html"><button class="px-4 py-2 text-purple-600 transition-colors duration-150 bg-white rounded-l-lg focus:shadow-outline hover:bg-green-100">Prev</button></a></li>
+             <li><a href="13.html"><button class="px-4 py-2 text-purple-600 transition-colors duration-150 bg-white rounded-r-lg focus:shadow-outline hover:bg-green-100">Next</button></a></li>
           </ul>
         </nav>
       </div>

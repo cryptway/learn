@@ -110,20 +110,123 @@
                 <!--Title-->
                 <div class="font-sans bg-white pl-5 py-5  rounded shadow-lg">
                  
-                         <h1 class="font-sans mx-5 break-normal text-gray-900 text-xl">Blockchain Basics
-
+                         <h1 class="font-sans mx-5 break-normal text-gray-900 text-xl">Introduction to Smart Contracts 
                         </h1>
                          
                 </div>
        <br>
 
-          
+       <div class="relative mt-6  rounded shadow-lg">
+  <img src="https://blogger.googleusercontent.com/img/a/AVvXsEjaqRBEVEsyS328J8cbTPxkAlqQc0-LQTmXXIe1T_t1hjxJij0n3NpwjnifhuYbj__Rxlu38ei3k-wi2LLVFLc_fkiPnzP-648idy20gjxu9QsARFsEy8QDAVQs0BeOfZwVe6pW2LUwlgT86eFYNx3-iuS2iovPcD0E2BoH0zsKKlxjPHIZWsjfPNklyA" alt="" srcset=""></div> <br>
+
+        
 
                
                 <!--Post Content-->
                 <div class=" bg-white pl-5 pr-2 py-5  rounded shadow-lg">
                     
-               
+                    <h1>Introduction to Smart Contracts</h1>
+
+                    <h2>A Simple Smart Contract</h2>
+                    
+                    <p>Let us begin with a basic example that sets the value of a variable and exposes it for other contracts to access. It is fine if you do not understand everything right now, we will go into more details later.</p>
+                    
+                    <h3>Storage Example</h3>
+                    
+                    <p>&nbsp;</p>
+                    
+                    <blockquote>
+                    <pre>
+                    // SPDX-License-Identifier: GPL-3.0
+                    pragma solidity &gt;=0.4.16 &lt;0.9.0;
+                    
+                    contract SimpleStorage {
+                        uint storedData;
+                    
+                        function set(uint x) public {
+                            storedData = x;
+                        }
+                    
+                        function get() public view returns (uint) {
+                            return storedData;
+                        }
+                    }
+                    </pre>
+                    </blockquote>
+                    
+                    <p>The first line tells you that the source code is licensed under the GPL version 3.0. Machine-readable license specifiers are important in a setting where publishing the source code is the default.</p>
+                    
+                    <p>The next line specifies that the source code is written for Solidity version 0.4.16, or a newer version of the language up to, but not including version 0.9.0. This is to ensure that the contract is not compilable with a new (breaking) compiler version, where it could behave differently.&nbsp;<a href="https://docs.soliditylang.org/en/v0.8.17/layout-of-source-files.html#pragma">Pragmas</a>&nbsp;are common instructions for compilers about how to treat the source code (e.g.&nbsp;<a href="https://en.wikipedia.org/wiki/Pragma_once">pragma once</a>).</p>
+                    
+                    <p>A contract in the sense of Solidity is a collection of code (its&nbsp;<em>functions</em>) and data (its&nbsp;<em>state</em>) that resides at a specific address on the Ethereum blockchain. The line&nbsp;<code>uint&nbsp;storedData;</code>&nbsp;declares a state variable called&nbsp;<code>storedData</code>&nbsp;of type&nbsp;<code>uint</code>&nbsp;(<em>u</em>nsigned&nbsp;<em>int</em>eger of&nbsp;<em>256</em>&nbsp;bits). You can think of it as a single slot in a database that you can query and alter by calling functions of the code that manages the database. In this example, the contract defines the functions&nbsp;<code>set</code>&nbsp;and&nbsp;<code>get</code>&nbsp;that can be used to modify or retrieve the value of the variable.</p>
+                    
+                    <p>To access a member (like a state variable) of the current contract, you do not typically add the&nbsp;<code>this.</code>&nbsp;prefix, you just access it directly via its name. Unlike in some other languages, omitting it is not just a matter of style, it results in a completely different way to access the member, but more on this later.</p>
+                    
+                    <p>This contract does not do much yet apart from (due to the infrastructure built by Ethereum) allowing anyone to store a single number that is accessible by anyone in the world without a (feasible) way to prevent you from publishing this number. Anyone could call&nbsp;<code>set</code>&nbsp;again with a different value and overwrite your number, but the number is still stored in the history of the blockchain. Later, you will see how you can impose access restrictions so that only you can alter the number.</p>
+                    
+                    <p>&nbsp;</p>
+                    
+                    <p>&nbsp;</p>
+                    
+                    <h3>Subcurrency Example</h3>
+                    
+                    <p>The following contract implements the simplest form of a cryptocurrency. The contract allows only its creator to create new coins (different issuance schemes are possible). Anyone can send coins to each other without a need for registering with a username and password, all you need is an Ethereum keypair.</p>
+                    
+                    <blockquote>
+                    <p>&nbsp;</p>
+                    
+                    <pre>
+                    // SPDX-License-Identifier: GPL-3.0
+                    pragma solidity ^0.8.4;
+                    
+                    contract Coin {
+                        // The keyword &quot;public&quot; makes variables
+                        // accessible from other contracts
+                        address public minter;
+                        mapping (address =&gt; uint) public balances;
+                    
+                        // Events allow clients to react to specific
+                        // contract changes you declare
+                        event Sent(address from, address to, uint amount);
+                    
+                        // Constructor code is only run when the contract
+                        // is created
+                        constructor() {
+                            minter = msg.sender;
+                        }
+                    
+                        // Sends an amount of newly created coins to an address
+                        // Can only be called by the contract creator
+                        function mint(address receiver, uint amount) public {
+                            require(msg.sender == minter);
+                            balances[receiver] += amount;
+                        }
+                    
+                        // Errors allow you to provide information about
+                        // why an operation failed. They are returned
+                        // to the caller of the function.
+                        error InsufficientBalance(uint requested, uint available);
+                    
+                        // Sends an amount of existing coins
+                        // from any caller to an address
+                        function send(address receiver, uint amount) public {
+                            if (amount &gt; balances[msg.sender])
+                                revert InsufficientBalance({
+                                    requested: amount,
+                                    available: balances[msg.sender]
+                                });
+                    
+                            balances[msg.sender] -= amount;
+                            balances[receiver] += amount;
+                            emit Sent(msg.sender, receiver, amount);
+                        }
+                    }</pre>
+                    </blockquote>
+                    
+                    <p>&nbsp;</p>
+                    
+                    <p>Learn it&nbsp;&nbsp;-&nbsp;https://docs.soliditylang.org/en/v0.8.17/introduction-to-smart-contracts.html</p>
+                    
   </div> <br>
                
                  
@@ -144,8 +247,8 @@
     <div class="   flex mx-auto items-center flex-wrap">
         <nav aria-label="Page navigation">
           <ul class="inline-flex">
-            <li><a href="8.html"><button class="px-4 py-2 text-purple-600 transition-colors duration-150 bg-white rounded-l-lg focus:shadow-outline hover:bg-green-100">Prev</button></a></li>
-             <li><a href="10.html"><button class="px-4 py-2 text-purple-600 transition-colors duration-150 bg-white rounded-r-lg focus:shadow-outline hover:bg-green-100">Next</button></a></li>
+            <li><a href="7.html"><button class="px-4 py-2 text-purple-600 transition-colors duration-150 bg-white rounded-l-lg focus:shadow-outline hover:bg-green-100">Prev</button></a></li>
+             <li><a href="9.html"><button class="px-4 py-2 text-purple-600 transition-colors duration-150 bg-white rounded-r-lg focus:shadow-outline hover:bg-green-100">Next</button></a></li>
           </ul>
         </nav>
       </div>
