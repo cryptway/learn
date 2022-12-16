@@ -55,6 +55,7 @@ body {
   margin: 0;
   /* 1 */
   line-height: inherit;
+  overflow-wrap: break-word;
   /* 2 */
 }
 
